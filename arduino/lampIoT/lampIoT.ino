@@ -108,7 +108,7 @@ void resetValue(){
 
 }
 int isMatch(){
-  return analogSound==0&&switchLeftGraph==0&&matchGraph&& abs(maxLeftGraph - maxRightGraph)<250 && indexLeft>1&& indexLeft<6&&indexRight>1&&indexRight<6&&index-checkIndexInGraph==1&&(sumLeft+sumRight)>1000&&(sumLeft+sumRight)<2800; 
+  return analogSound==0&&switchLeftGraph==0&&matchGraph&& abs(maxLeftGraph - maxRightGraph)<300 && indexLeft>1&& indexLeft<6&&indexRight>1&&indexRight<6&&index-checkIndexInGraph==1&&(sumLeft+sumRight)>1000&&(sumLeft+sumRight)<2800; 
 }
 void saveAnalogSound()
 {
@@ -118,20 +118,30 @@ void saveAnalogSound()
     if((index-checkIndexInGraph)<=3&&(index-checkIndexInGraph)>1&&switchLeftGraph==1){
       switchLeftGraph=0;
       Serial.println("Switch:");
-      Serial.println("Begin1");
-      for(int i=0;i<indexLeft;i++){
-        Serial.println(leftGraph[i]);
-      }
-      Serial.println("End1");
+   
     }
     if(switchLeftGraph) processAnalogSound(analogSound,&countTopLeftGraph,&indexLeft,&maxLeftGraph,&sumLeft,leftGraph);
-    else  processAnalogSound(analogSound,&countTopRightGraph,&indexRight,&maxLeftGraph,&sumRight,rightGraph);
+    else  processAnalogSound(analogSound,&countTopRightGraph,&indexRight,&maxRightGraph,&sumRight,rightGraph);
   }
   
   if(matchGraph==0||((index-checkIndexInGraph)>3)){
     resetValue();
   }
-  
+//  if(switchLeftGraph==0 && analogSound==0){
+//      Serial.println("Begin1");
+//    for(int i=0;i<indexLeft;i++){
+//      Serial.println(leftGraph[i]);
+//    }
+//    Serial.println("End1");
+//    Serial.println("Begin2");
+//    for(int i=0;i<indexRight;i++){
+//      Serial.println(rightGraph[i]);
+//    }
+//    Serial.println("End2");
+//    Serial.println("Max");
+//    Serial.println(
+//
+//  }
 
   if(isMatch()){
     Serial.println("Begin1");
@@ -146,6 +156,7 @@ void saveAnalogSound()
     Serial.println("End2");
     stateLight=!stateLight;
     digitalWrite(pinLed,stateLight);
+    resetValue();
   }
 
   analogSound=0;
