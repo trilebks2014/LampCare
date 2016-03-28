@@ -87,6 +87,7 @@ void processAnalogSound(int analogSound,int *countTop,int *indexGraph,int *maxGr
               graph[(*indexGraph)++]=analogSound;
               checkIndexInGraph= index;
               *sumGraph+=analogSound;
+              *maxGraph=analogSound;
              // Serial.println(*indexGraph);
            }
     }
@@ -100,7 +101,6 @@ void resetValue(){
   switchLeftGraph=1;
   countTopRightGraph=0;
   countTopLeftGraph=0;
-  index=0;
   maxLeftGraph=0;
   maxRightGraph=0;
   sumLeft=0;
@@ -108,23 +108,31 @@ void resetValue(){
 
 }
 int isMatch(){
-  return analogSound==0&&switchLeftGraph==0&&matchGraph&& abs(maxLeftGraph - maxRightGraph)<300 && indexLeft>1&& indexLeft<6&&indexRight>1&&indexRight<6&&index-checkIndexInGraph==1&&(sumLeft+sumRight)>1000&&(sumLeft+sumRight)<2800; 
+  return analogSound==0&&switchLeftGraph==0&&matchGraph&& abs(maxLeftGraph - maxRightGraph)<750 && indexLeft>1&& indexLeft<6&&indexRight>1&&indexRight<6&&index-checkIndexInGraph==1&&(sumLeft+sumRight)>1000&&(sumLeft+sumRight)<2800; 
+}
+void resetIndex(){
+  index=0;
 }
 void saveAnalogSound()
 {
   index ++;
   Serial.println(analogSound);
   if(analogSound <1000 && analogSound >0&& matchGraph){
-    if((index-checkIndexInGraph)<=3&&(index-checkIndexInGraph)>1&&switchLeftGraph==1){
+    if((index-checkIndexInGraph)<=4&&(index-checkIndexInGraph)>1&&switchLeftGraph==1){
       switchLeftGraph=0;
       Serial.println("Switch:");
+      if((index-checkIndexInGraph)<=4){
+        Serial.println("4 <-");
+      }else{
+        Serial.println(" >1");
+      }
    
     }
     if(switchLeftGraph) processAnalogSound(analogSound,&countTopLeftGraph,&indexLeft,&maxLeftGraph,&sumLeft,leftGraph);
     else  processAnalogSound(analogSound,&countTopRightGraph,&indexRight,&maxRightGraph,&sumRight,rightGraph);
   }
   
-  if(matchGraph==0||((index-checkIndexInGraph)>3)){
+  if(matchGraph==0||((index-checkIndexInGraph)>4)){
     resetValue();
   }
 //  if(switchLeftGraph==0 && analogSound==0){
@@ -160,5 +168,5 @@ void saveAnalogSound()
   }
 
   analogSound=0;
-  
+  if(index>30000) resetIndex();
 }
