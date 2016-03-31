@@ -16,6 +16,12 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from django.http import HttpResponse
+	
+def main(reponse):
+	return HttpResponse("MAIN")
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^api-post/','sensor.views.PushData',name="pushdata"),
+    url(r'^$',main)
 ]
