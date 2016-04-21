@@ -9,12 +9,15 @@
 //    and finally it look like a double moutain raise up and fall down complety
 //So this is my code for that
 // switchLeftGraph: notice if save to variable left
-
+#include <ArduinoJson.h>
 #include <MsTimer2.h>
+#include <SoftwareSerial.h>
+#include <stdlib.h>
+# define portSer 115200
 #define CHA 3
 int pinLed =13;
 int pinLedMotion =12;
-long analogSound = 0;
+long analogSound = 20;
 int numClap =0;
 boolean stateLight = LOW ;
 int index=0;
@@ -28,21 +31,92 @@ int countTopLeftGraph=0,countTopRightGraph=0;
 int maxLeftGraph=0,maxRightGraph=0;
 int matchGraph=1;
 int sumLeft=0,sumRight=0;
+int passiveInfrared=1;
 
+
+//Variable WIFI
+
+SoftwareSerial ser(10, 11); //RX=10,TX=11
+const String ssid ="TungTruong";
+const String pass = "cohangxom@321";
+const String linkAPISensor = "127.0.0.1";
+
+const String idlamp="TriLamp1";
+
+void setupWifi(){
+      ser.begin(portSer);
+      ser.println("AT+CWMODE=1\n");
+      ser.println("AT+CWJAP=\""+ ssid +"\",\""+pass+"\"\r\n"); 
+      ser.println("AT+RST");
+ 
+
+}
+void upData(){
+  String cmd = "AT+CIPSTART=\"TCP\",\"";
+  cmd += linkAPISensor;
+  cmd += "\",8000";
+  ser.println(cmd);
+  if(ser.find("Error")){
+    Serial.println("AT+CIPSTART error");
+    return;
+  }
+  String getStr = "GET /api-post/?sound=30";
+//  getStr+=analogSound;
+  getStr+="&passiveInfrared=40";
+//  getStr+=passiveInfrared;
+  getStr+="&idlamp=123abc";
+//  getStr+=idlamp;
+  getStr += "\r\n\r\n";
+
+
+
+
+  //Send length
+  cmd = "AT+CIPSEND=";
+  cmd += String(getStr.length());
+  ser.println(cmd);
+
+  if(ser.find(">")){
+    ser.print(getStr);
+  }
+  else{
+    ser.println("AT+CIPCLOSE");
+    // alert user
+    Serial.println("AT+CIPCLOSE");
+  }
+
+  delay(3000);
+  //Send data
+
+  
+
+}
 void setup() {
   // put your setup code here, to run once:
+  Serial.begin(portSer); 
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  setupWifi();
   pinMode(CHA, INPUT_PULLUP);
   pinMode(motionPin, INPUT_PULLUP);
   pinMode(pinLed,OUTPUT);  
   pinMode(pinLedMotion,OUTPUT);  
-
+  
   attachInterrupt(1, encoder, RISING); 
-  Serial.begin(115200); 
+  
   MsTimer2::set(100, saveAnalogSound); // 5ms period
     MsTimer2::start();
 }
 
 void loop() {
+  
+  if (ser.available()) {
+    Serial.write(ser.read());
+  }
+  if (Serial.available()) {
+    ser.write(Serial.read());
+  }
   // put your main code here, to run repeatedly:
   if (digitalRead(motionPin) ==1){
    // Serial.println("Co chuyen dong");
@@ -52,7 +126,10 @@ void loop() {
   }else{
      digitalWrite(pinLedMotion,LOW);
   }
+  //upData();
+
 }
+
 
 void encoder()
   {
@@ -116,17 +193,16 @@ void resetIndex(){
 void saveAnalogSound()
 {
   index ++;
-  Serial.println(analogSound);
+ // Serial.println(analogSound);
   if(analogSound <1000 && analogSound >0&& matchGraph){
     if((index-checkIndexInGraph)<=4&&(index-checkIndexInGraph)>1&&switchLeftGraph==1){
       switchLeftGraph=0;
-      Serial.println("Switch:");
-      if((index-checkIndexInGraph)<=4){
-        Serial.println("4 <-");
-      }else{
-        Serial.println(" >1");
-      }
-   
+//      Serial.println("Switch:");
+//      if((index-checkIndexInGraph)<=4){
+//        Serial.println("4 <-");
+//      }else{
+//        Serial.println(" >1");
+//      }
     }
     if(switchLeftGraph) processAnalogSound(analogSound,&countTopLeftGraph,&indexLeft,&maxLeftGraph,&sumLeft,leftGraph);
     else  processAnalogSound(analogSound,&countTopRightGraph,&indexRight,&maxRightGraph,&sumRight,rightGraph);
