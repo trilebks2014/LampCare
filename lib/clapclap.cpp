@@ -1,6 +1,5 @@
 #include "clapclap.h"
-#include "iostream"
-#include "math.h"
+#include <stdlib.h>
 ClapClap::ClapClap(int pinSound,int  sum2GraphMin,int sum2GraphMax,int disparityTopGraph):sum2GraphMin(sum2GraphMin),sum2GraphMax(sum2GraphMax),disparityTopGraph(disparityTopGraph){}
 
 
@@ -14,7 +13,7 @@ int ClapClap::checkTop(GraphSound graphSound){
 
 int ClapClap::isMatch(){
   return analogSound==0&&switchLeftGraph==0&&matchGraph&&
-   std::abs(leftGraph.top - rightGraph.top)<disparityTopGraph &&
+  abs(leftGraph.top - rightGraph.top)<disparityTopGraph &&
    leftGraph.index>1&& leftGraph.index<6&&
    rightGraph.index>1&&rightGraph.index<6&&
    indexSound-checkIndexInGraph==1&&
