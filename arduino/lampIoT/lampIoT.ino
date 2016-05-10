@@ -64,13 +64,9 @@ void upData(){
 //  getStr+=analogSound;
   getStr+="&passiveInfrared=40";
 //  getStr+=passiveInfrared;
-  getStr+="&idlamp=123abc";
+  getStr+="&idlamp=123abcd";
 //  getStr+=idlamp;
   getStr += "\r\n\r\n";
-
-
-
-
   //Send length
   cmd = "AT+CIPSEND=";
   cmd += String(getStr.length());
@@ -87,10 +83,38 @@ void upData(){
 
   delay(3000);
   //Send data
-
-  
-
 }
+
+
+void getData(){
+  Serial.println("AT+CIPMUX=0"); // set to single connection mode
+  String cmd = "AT+CIPSTART=\"TCP\",\"";
+  cmd += linkAPISensor;
+  cmd += "\",8000";
+  Serial.println(cmd);
+  //lcdSerial.println(cmd);
+  if(Serial.find("Error")) return;
+  
+  cmd = "GET /apiusers/";
+//  cmd += LOCATIONID;
+//  cmd +=".json";
+  cmd += " HTTP/1.1\r\nHost: "+linkAPISensor+"\r\n\r\n";
+  Serial.print(F("AT+CIPSEND="));
+  Serial.println(cmd.length());
+  if(Serial.find(">")){
+    //lcdSerial.print(">");
+  }else{
+    Serial.println(F("AT+CIPCLOSE"));
+    delay(1000);
+    return;
+  }
+  Serial.print(cmd);
+  
+}
+
+
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(portSer); 
@@ -102,32 +126,21 @@ void setup() {
   pinMode(motionPin, INPUT_PULLUP);
   pinMode(pinLed,OUTPUT);  
   pinMode(pinLedMotion,OUTPUT);  
-  
+  // Active clap clap to enable led
   attachInterrupt(1, encoder, RISING); 
   
   MsTimer2::set(100, saveAnalogSound); // 5ms period
-    MsTimer2::start();
+  MsTimer2::start();
 }
 
 void loop() {
-  
   if (ser.available()) {
     Serial.write(ser.read());
   }
   if (Serial.available()) {
     ser.write(Serial.read());
   }
-  // put your main code here, to run repeatedly:
-  if (digitalRead(motionPin) ==1){
-   // Serial.println("Co chuyen dong");
-    digitalWrite(pinLedMotion,HIGH);
-
-    
-  }else{
-     digitalWrite(pinLedMotion,LOW);
-  }
-  //upData();
-
+  upData();
 }
 
 
@@ -197,12 +210,6 @@ void saveAnalogSound()
   if(analogSound <1000 && analogSound >0&& matchGraph){
     if((index-checkIndexInGraph)<=4&&(index-checkIndexInGraph)>1&&switchLeftGraph==1){
       switchLeftGraph=0;
-//      Serial.println("Switch:");
-//      if((index-checkIndexInGraph)<=4){
-//        Serial.println("4 <-");
-//      }else{
-//        Serial.println(" >1");
-//      }
     }
     if(switchLeftGraph) processAnalogSound(analogSound,&countTopLeftGraph,&indexLeft,&maxLeftGraph,&sumLeft,leftGraph);
     else  processAnalogSound(analogSound,&countTopRightGraph,&indexRight,&maxRightGraph,&sumRight,rightGraph);
@@ -211,22 +218,6 @@ void saveAnalogSound()
   if(matchGraph==0||((index-checkIndexInGraph)>4)){
     resetValue();
   }
-//  if(switchLeftGraph==0 && analogSound==0){
-//      Serial.println("Begin1");
-//    for(int i=0;i<indexLeft;i++){
-//      Serial.println(leftGraph[i]);
-//    }
-//    Serial.println("End1");
-//    Serial.println("Begin2");
-//    for(int i=0;i<indexRight;i++){
-//      Serial.println(rightGraph[i]);
-//    }
-//    Serial.println("End2");
-//    Serial.println("Max");
-//    Serial.println(
-//
-//  }
-
   if(isMatch()){
     Serial.println("Begin1");
     for(int i=0;i<indexLeft;i++){
