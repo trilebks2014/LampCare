@@ -30,10 +30,11 @@ class ClapClap{
 	int switchLeftGraph=1;
 	public:
 		ClapClap(int pinSound,int  =650,int =1500,int =250);
+		ClapClap(int pinSound,float coefficient);
 		int checkClapClap(int analogSound);
 	private:
 		int isMatch();
-		void processAnalogSound(GraphSound graph);
+		void processAnalogSound(GraphSound *graph);
 		int checkTop(GraphSound graphSound);
 		void resetValue();
 		void resetIndex();
