@@ -8,4 +8,4 @@ class Sensor(models.Model):
 	passiveInfrared = models.IntegerField()
 	time = models.DateTimeField(default=datetime.now, blank=False)
 	def __str__(self):
-		return unicode(self.idLamp)
+		return unicode(self.id)
