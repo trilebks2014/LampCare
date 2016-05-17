@@ -11,7 +11,7 @@
 //So this is my code for that
 
 #include "clapclap.h"
-
+#include "Ticker.h"
 //WIFI
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
@@ -26,8 +26,9 @@ struct UserData{
 UserData* userData; 
 
 #define USE_SERIAL Serial
-const char* ssid = "TungTruong";
-const char* password = "cohangxom@321";
+const char* ssid[] = {"TungTruong","Molly coffee T1"};
+const char* password[] = {"cohangxom@321","111111111"};
+const int wifiIndex = 1;
 //ENDWIFI
 #define pinPassiveInfrared D4
 
@@ -42,9 +43,10 @@ int analogSound=0;
 int stateLed = HIGH;
 
 void encoder();
-void postData(int analogSound,int digitalPI)
+void timeClapClap();
 void getData();
-
+void postSensorData(int analogSound,int digitalPI);
+Ticker ticker;
 
 void setupWifi(){
     USE_SERIAL.println();
@@ -55,7 +57,7 @@ void setupWifi(){
       USE_SERIAL.flush();
       delay(1000);
     }
-     WiFiMulti.addAP(ssid, password);
+     WiFiMulti.addAP(ssid[wifiIndex], password[wifiIndex]);
 }
 
 
@@ -67,33 +69,60 @@ void setup() {
   pinMode(pinLed, OUTPUT);
   pinMode(pinPassiveInfrared,INPUT_PULLUP);
   attachInterrupt(5, encoder, RISING); 
-   
+  ticker.attach(0.1,timeClapClap)  ;
 
 }
 
 
 void loop() {
-      timerClapClap=millis()-pretimerClapClap;
-      if(timerClapClap>=100)
-        {
-          if(clapclap.checkClapClap(analogSound)){
-            stateLed = !stateLed;
-            pinMode(pinLed,stateLed);
-          }
-      
-          timerCount ++;
-          if(timerCount%10==0){
-              postData(analogSound,digitalRead(pinPassiveInfrared));
-          }
-
-          analogSound=0;
-          pretimerClapClap=millis();
-          }
+//      timerClapClap=millis()-pretimerClapClap;
+//      if(timerClapClap>=100)
+//        {
+//          if(clapclap.checkClapClap(analogSound)){
+//            stateLed = !stateLed;
+//            pinMode(pinLed,stateLed);
+//          }
+//      
+//          timerCount ++;
+//          if(timerCount%10==0){
+//              postSensorData(analogSound,digitalRead(pinPassiveInfrared));
+//          }
+//
+//          analogSound=0;
+//          pretimerClapClap=millis();
+//          }
       
       
 }
-void postData(int analogSound,int digitalPI){
-  Serial.printf(">>>>> %d, %d\n",analogSound,digitalPI);
+
+void timeClapClap(){
+  Serial.printf(">>>");
+  if(clapclap.checkClapClap(analogSound)){
+      stateLed = !stateLed;
+      pinMode(pinLed,stateLed);
+  }
+  timerCount++;
+  if(timerCount%10==0){
+      postSensorData(analogSound,digitalRead(pinPassiveInfrared));
+  }
+
+    analogSound=0;
+}
+
+
+
+void postSensorData(int analogSound,int digitalPI){
+ Serial.printf(">>>>> %d, %d\n",analogSound,digitalPI);
+// HTTPClient httpSensor;
+// httpSensor.begin("http://skymarsch.xyz/api/users/");
+//// httpSensor.setAuthorization("tomle","newlife1");
+// httpSensor.addHeader("Content-Type", "application/json");
+// String payload  = "{\"sound\":33,\"passiveInfrared\":1,\"lamp\":1}";
+// String payload1 = "{\"email\":\"sadsadasdqweewq@gmail.com\",\"username\":\"thienkhonggay\",\"first_name\":\"Tri\",\"last_name\":\"le\",\"password\":\"thien123\",\"confirm_password\":\"thien123\"}";
+// Serial.println(payload1);
+// int httpCode = httpSensor.POST(payload1);
+// Serial.println("<<<<<<>>>>");
+// Serial.println(httpCode);
 }
 
 void getData(){

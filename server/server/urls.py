@@ -19,18 +19,8 @@ from django.contrib.auth.models import User
 from sensor import views
 from django.http import HttpResponse
 from rest_framework import routers, serializers, viewsets
-from sensor.models import Sensor
+from sensor.serializer import SensorViewSet
 
-
-class SensorSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Sensor
-        fields = ('idLamp', 'sound', 'passiveInfrared', 'time')
-
-# ViewSets define the view behavior.
-class SensorViewSet(viewsets.ModelViewSet):
-    queryset = Sensor.objects.all()
-    serializer_class = SensorSerializer
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -46,6 +36,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    
 router.register(r'users', UserViewSet)
 
 # router = routers.DefaultRouter()
