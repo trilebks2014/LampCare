@@ -13,6 +13,7 @@
 #include "clapclap.h"
 #include "Ticker.h"
 //WIFI
+
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <GDBStub.h>
@@ -30,6 +31,15 @@ const char* ssid[] = {"TungTruong","Molly coffee T1"};
 const char* password[] = {"cohangxom@321","111111111"};
 const int wifiIndex = 1;
 //ENDWIFI
+
+
+//LCD
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+// D6 sda ; D7 SCL
+
+//ENDLCD
 #define pinPassiveInfrared D4
 
 #define pinSound 5
@@ -46,7 +56,16 @@ void encoder();
 void timeClapClap();
 void getData();
 void postSensorData(int analogSound,int digitalPI);
+void getSensorMethod(int analogSound,int digitalPI);
 Ticker ticker;
+
+void setupLCD(){
+  lcd.begin();
+  lcd.backlight();
+  lcd.setCursor(3,0);
+  lcd.print("Hello TomLe");
+}
+
 
 void setupWifi(){
     USE_SERIAL.println();
@@ -65,6 +84,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   setupWifi();
+  setupLCD();
   pinMode(pinSound, INPUT_PULLUP);
   pinMode(pinLed, OUTPUT);
   pinMode(pinPassiveInfrared,INPUT_PULLUP);
@@ -102,7 +122,7 @@ void timeClapClap(){
       pinMode(pinLed,stateLed);
   }
   timerCount++;
-  if(timerCount%10==0){
+  if(timerCount%100==0){
       postSensorData(analogSound,digitalRead(pinPassiveInfrared));
   }
 
@@ -123,6 +143,10 @@ void postSensorData(int analogSound,int digitalPI){
 // int httpCode = httpSensor.POST(payload1);
 // Serial.println("<<<<<<>>>>");
 // Serial.println(httpCode);
+}
+
+void getSensorMethod(int analogSound,int digitalPI){
+  
 }
 
 void getData(){
